@@ -7,6 +7,7 @@
 
     <title>Stream Example</title>
     <link rel="stylesheet" href="./styles.css">
+    <link rel="shortcut icon" href="#">
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://code.highcharts.com/modules/data.js"></script>
     <script src="https://code.highcharts.com/modules/exporting.js"></script>
@@ -21,6 +22,7 @@
 <body>
   <!-- your content here... -->
   <!-- <h2 class="title">Stream Data</h2> -->
+  
   <figure class="highcharts-figure">
     <div id="container"></div>
     <p class="highcharts-description">
@@ -33,6 +35,48 @@
         Interactive figures may take 10-20 seconds to load. </h3>
   </figure>
 
+  <select id="dropdown">
+    <option value="turb-mean">Turb Mean</option>
+    <option value="turb-temp">Turb Temp</option>
+  </select>
+  
+
+  
+
+  <select name="creek-type" id="creek-type">
+    <option value="kelsey">Kelsey</option>
+    <option value="middle">Middle</option>
+    <option value="scotts">Scotts</option>
+  </select>
+  
+  <!-- <div class="datatime-form">
+    <p>Enter FROM date: </p>
+    <input type="date" id="from-time" class="datatime-input">
+
+    <p>Enter TO date: </p>
+    <input type="date" id="to-time" class="datatime-input">
+
+    <button type="button" onClick="hello()">Click Me!</button>
+  </div> -->
+
+  <div class="container1">
+    <form action="signup.html" method="post" id="signup">
+      <h1>Sign Up</h1>
+      <div class="field">
+        <label for="from-time">Enter FROM date: </label>
+        <input type="date" id="from-time" class="datatime-input">
+        <small></small>
+      </div>
+      <div class="field">
+        <label for="to-time">Enter TO date: </label>
+        <input type="date" id="to-time" class="datatime-input">        
+        <small></small>
+      </div>
+      <div class="field">
+        <button type="submit" class="full">Submit</button>
+      </div>
+    </form>
+  </div>
 
   <script src="./scripts.js"></script>
 </body>

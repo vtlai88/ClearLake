@@ -2,6 +2,17 @@
     color: red;
 }
 
+.datatime-form {
+  text-align: center;
+  margin: auto;
+  width: 50%;
+}
+
+.datetime-input {
+  width: 500px;
+  font-family: sans-serif;
+}
+
 .highcharts-figure,
 .highcharts-data-table table {
   min-width: 360px;
