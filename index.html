@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Stream Example</title>
+    <title>Stream Monitoring</title>
     <link rel="stylesheet" href="./styles.css">
     <link rel="shortcut icon" href="#">
     <script src="https://code.highcharts.com/highcharts.js"></script>
@@ -14,69 +14,95 @@
     <script src="https://code.highcharts.com/modules/export-data.js"></script>
     <script src="https://code.highcharts.com/modules/accessibility.js"></script>
 
-
-
-
 </head>
 
 <body>
-  <!-- your content here... -->
-  <!-- <h2 class="title">Stream Data</h2> -->
   
-  <figure class="highcharts-figure">
-    <div id="container"></div>
-    <p class="highcharts-description">
-        In December 2018, in-situ stream sensors were deployed in the three primary lake tributaries: 
-        Kelsey, Middle and Scotts Creek. The probes record stream turbidity and temperature measurements 
-        and transmit data every 10 minutes via a cellular modem to UC Davis servers. The sensors are 
-        co-located with existing California Department of Water Resources gauging stations. 
+  <div class="text-container">
+    <p class="description">
+      In December 2018, in-situ stream sensors were deployed in the three primary lake tributaries: 
+      Kelsey, Middle and Scotts Creek. The probes record stream turbidity and temperature measurements 
+      and transmit data every 10 minutes via a cellular modem to UC Davis servers. The sensors are 
+      co-located with existing California Department of Water Resources gauging stations. 
     </p>
-    <h3 class="highcharts-description"> Note: These data are provisional and not error checked!
-        Interactive figures may take 10-20 seconds to load. </h3>
-  </figure>
+    <h3 class="note"> Note: These data are provisional and not error checked!
+      Interactive figures may take 10-20 seconds to load. </h3>
+  </div>
 
-  <select id="dropdown">
-    <option value="turb-mean">Turb Mean</option>
-    <option value="turb-temp">Turb Temp</option>
-  </select>
+
+
+  <figure class="highcharts-figure">
   
-
+  <div id="turb-container"></div>
   
-
-  <select name="creek-type" id="creek-type">
-    <option value="kelsey">Kelsey</option>
-    <option value="middle">Middle</option>
-    <option value="scotts">Scotts</option>
-  </select>
-  
-  <!-- <div class="datatime-form">
-    <p>Enter FROM date: </p>
-    <input type="date" id="from-time" class="datatime-input">
-
-    <p>Enter TO date: </p>
-    <input type="date" id="to-time" class="datatime-input">
-
-    <button type="button" onClick="hello()">Click Me!</button>
-  </div> -->
-
   <div class="container1">
-    <form action="signup.html" method="post" id="signup">
-      <h1>Sign Up</h1>
-      <div class="field">
-        <label for="from-time">Enter FROM date: </label>
-        <input type="date" id="from-time" class="datatime-input">
-        <small></small>
+    <form id="turb-mean-form-info">
+      <p class="form-description center">Adjust your time window for Stream Turbity Mean</p>
+      <div class="row">
+        <div class="column center">
+          <h3 class="form-labels">Time from:</h3>
+        </div>
+        <div class="column center">
+          <h3 class="form-labels">Time to:</h3>
+        </div>
       </div>
-      <div class="field">
-        <label for="to-time">Enter TO date: </label>
-        <input type="date" id="to-time" class="datatime-input">        
-        <small></small>
+      
+      <div class="row">
+        <div class="column center">
+          <input type="date" id="from-time" class="datatime-input">
+        </div>
+        <div class="column center">
+          <input type="date" id="to-time" class="datatime-input"> 
+        </div>
       </div>
-      <div class="field">
-        <button type="submit" class="full">Submit</button>
+      <div class="btn-container center">
+        <button type="submit" class="submit-btn">Submit</button>
       </div>
+      
     </form>
   </div>
+  <div class="spacer"></div>
+
+
+    
+  <div id="temp-container"></div>
+  <div class="container1">
+    <form id="temperature-form-info">
+      <p class="form-description center">Adjust your time window for Stream Temperature</p>
+      <div class="row">
+        <div class="column center">
+          <h3 class="form-labels">Time from:</h3>
+        </div>
+        <div class="column center">
+          <h3 class="form-labels">Time to:</h3>
+        </div>
+      </div>
+      
+      <div class="row">
+        <div class="column center">
+          <input type="date" id="from-time" class="datatime-input">
+        </div>
+        <div class="column center">
+          <input type="date" id="to-time" class="datatime-input"> 
+        </div>
+      </div>
+      <div class="btn-container center">
+        <button type="submit" class="submit-btn">Submit</button>
+      </div>
+      
+    </form>
+  </div>
+    
+    
+</figure>
+
+
+  
+
+  
+
+
+
 
   <script src="./scripts.js"></script>
 </body>

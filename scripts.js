@@ -1,96 +1,18 @@
-// const chart = Highcharts.chart('container', {
-//     series: [{
-//       data: [29, 71, 106, 129, 144, 176, 135, 148, 216, 194, 95, 54]
-// }]
-// });
-
-// const dropdown = document.querySelector("#dropdown");
-
-// dropdown.addEventListener('change', (event) => {
-// let value = event.target.value,
-//     oldData = [29, 71, 106, 129, 144, 176, 135, 148, 216, 194, 95, 54],
-//     data2 = [22, 45, 88, 37, 52, 73, 89, 90, 43, 66, 24, 74];
-// if (value === 'Series2') {
-//     chart.series[0].update({
-//     data: data2
-//     })
-// } else {
-//     chart.series[0].update({
-//     data: oldData
-//     })
-// }
-// });
-
-
-
-var url = new URL('https://tepfsail50.execute-api.us-west-2.amazonaws.com/v1/report/cl-creeks?id=1&rptdate=20220202&rptend=20220202');
-
-// fetch(url)
-//     .then(res => res.json())
-//     .then((out) => {
-//         console.log('Output: ', out);
-//         data = out;
-// }).catch(err => console.error(err));
-
-async function apiGetAll (url) {
-    try {
-      const resp = await fetch(url)
-      
-        .then(response => response.json())
-        .then(data => console.log("WWWWW", data));
-      
-    
-      return resp;
-    } catch (err) {
-         console.log(err)
-      }
- }
-
-
-
-
-
-var search_params = url.searchParams;
-
-// add "topic" parameter
-search_params.set('id', '2');
-
-url.search = search_params.toString();
-
-var new_url = url.toString();
-
-// output : http://demourl.com/path?cl-creeks?id=2&rptdate=20220202&rptend=20220202
-console.log("new url: ",new_url);
-
-fetch(new_url)
-    .then(res => res.json())
-    .then((out) => {
-        console.log('Output: ', out);
-}).catch(err => console.error(err));
-
-
-
-var data = [{"Creek": "Kelsey", "TmStamp": "2022-02-02 23:50:00", "RecNum": "146653", "Turb_BES": "0.12", "Turb_Mean": "0.12", "Turb_Median": "0.12", "Turb_Var": "0.0", "Turb_Min": "0.05", "Turb_Max": "0.15", "Turb_Temp": "6.9"}, 
-{"Creek": "Kelsey", "TmStamp": "2022-02-02 23:40:00", "RecNum": "146652", "Turb_BES": "0.09", "Turb_Mean": "0.09", "Turb_Median": "0.1", "Turb_Var": "0.0", "Turb_Min": "0.03", "Turb_Max": "0.12", "Turb_Temp": "6.8"}];
-getTurbMean(data, "Kelsey");
-getTurbTemp(data, "Kelsey");
-
-
-// value: [TmStamp, Turb_Mean]
+// value: [TmStamp, Turb_BES]
 // TmStamp: in milliseconds
 // Turb_Mean: in floats
-function getTurbMean(data, creek) {
+function getTurbMean(data) {
     let m = [];
     data.forEach((element =>
-        m.push([new Date(element.TmStamp).getTime(), parseFloat(element.Turb_Mean)]))
+        m.push([new Date(element.TmStamp).getTime(), parseFloat(element.Turb_BES)]))
     );
     return m;
 }
 
 // value: [TmStamp, Turb_Temp]
 // TmStamp: in milliseconds
-// Turb_Mean: in floats
-function getTurbTemp(data, creek) {
+// Turb_Temp: in floats
+function getTurbTemp(data) {
     let m = [];
     data.forEach((element =>
         m.push([new Date(element.TmStamp).getTime(), parseFloat(element.Turb_Temp)]))
@@ -98,219 +20,306 @@ function getTurbTemp(data, creek) {
     return m;
 }
 
-console.log(getTurbTemp(data, "Kelsey"));
-console.log(getTurbMean(data, "Kelsey"));
+// get creekID based on input name
+function getCreekID(creekName) {
+    switch (creekName) {
+        case "kelsey":
+            return 1;
+        case "middle":
+            return 2;
+        case "scotts":
+            return 3;
+    } 
+}
 
-const chart = Highcharts.chart('container', {
-    chart: {
-        zoomType: 'x'
-    },
-    subtitle: {
-        text: document.ontouchstart === undefined ?
-            'Click and drag in the plot area to zoom in' : 'Pinch the chart to zoom in'
-    },
-    title: {
-        text: 'Kelsey Turb Mean'
-    },
-    xAxis: {
-        type: 'datetime'
-    },
-    yAxis: {
-        title: {
-            text: 'Turbity Mean'
-        }
-    },
+// async bc of the await
+// waits for data to be fetched
+// once raw data (in JSON format) fetched, 
+// get the creekName and queried data (depending on TurbMean or TurbTemp)
+async function asyncGetData(id,rptdate,rptend,dataKind) {
+    var url = new URL('https://tepfsail50.execute-api.us-west-2.amazonaws.com/v1/report/cl-creeks');
+    var search_params = url.searchParams;
+    search_params.set('id',id);
+    search_params.set('rptdate',rptdate);
+    search_params.set('rptend',rptend);
+    url.search = search_params.toString();
 
-    plotOptions: {
-        area: {
-            fillColor: {
-            linearGradient: {
-                x1: 0,
-                y1: 0,
-                x2: 0,
-                y2: 1
+    var new_url = url.toString();
+    console.log(new_url);
+    let rawDataJson = await fetch(new_url)
+        .then(res => res.json());
+
+    var queriedData = [];
+    console.log(rawDataJson);
+    if (dataKind == "turb") {
+        queriedData = getTurbMean(rawDataJson);
+    } else if (dataKind == "temp") {
+        queriedData = getTurbTemp(rawDataJson);
+    }
+    
+    return queriedData;
+}
+
+function getPreviousWeekDate() {
+    var today = new Date();
+    var lastWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate()-7);
+    console.log(lastWeek);
+    var month = (lastWeek.getUTCMonth() + 1).toString(); //months from 1-12
+    var day = lastWeek.getUTCDate().toString();
+    var year = lastWeek.getUTCFullYear().toString();
+
+    if (month.length < 2) {
+        month = '0' + month;
+    }
+    if (day.length < 2) {
+        day = '0' + day;
+    }
+    return year+month+day;
+}
+
+function getCurrentTime() {
+    var time = new Date().toLocaleDateString();
+    time = time.split('/');
+    var currentTimeArr = time.slice(0).reverse().map(
+        val => { return val;
+    })
+    if (currentTimeArr[1].length < 2) {
+        currentTimeArr[1] = '0' + currentTimeArr[1];
+    }
+    if (currentTimeArr[2].length < 2) {
+        currentTimeArr[2] = '0' + currentTimeArr[2];
+    }
+    var curTime = currentTimeArr[0] + currentTimeArr[2] + currentTimeArr[1];
+    return curTime;
+}
+
+// get the inputted time from the turb/flow form
+var turbMeanForm = document.querySelector("#turb-mean-form-info");
+
+if (turbMeanForm){
+    turbMeanForm.addEventListener("submit", function (event) {
+        // stop form submission
+        event.preventDefault();
+        var fromTime = turbMeanForm.elements["from-time"].value.replace(/-/g,'');
+        //console.log("fromTime: ", fromTime);
+        var toTime = turbMeanForm.elements["to-time"].value.replace(/-/g,'');
+        //console.log("toTime: ", toTime);
+        MyTurbMeanChart.updateData(fromTime, toTime);
+
+    });
+}
+
+// get the inputted time from the temperature form
+var temperatureForm = document.querySelector("#temperature-form-info");
+
+if (temperatureForm){
+    temperatureForm.addEventListener("submit", function (event) {
+        // stop form submission
+        event.preventDefault();
+        var fromTime = temperatureForm.elements["from-time"].value.replace(/-/g,'');
+        //console.log("fromTime: ", fromTime);
+        var toTime = temperatureForm.elements["to-time"].value.replace(/-/g,'');
+        //console.log("toTime: ", toTime);
+        MyTemperatureChart.updateData(fromTime, toTime);
+    });
+}
+
+// Turbity Mean chart component
+var MyTurbMeanChart = {
+    initHighCharts: function() {
+        this.chart = new Highcharts.chart('turb-container', {
+            chart: {
+                zoomType: 'x'
             },
-            stops: [
-                [0, Highcharts.getOptions().colors[0]],
-                [1, Highcharts.color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
-            ]
+            subtitle: {
+                text: document.ontouchstart === undefined ?
+                    'Click and drag in the plot area to zoom in' : 'Pinch the chart to zoom in'
             },
-            marker: {
-            radius: 2
+            title: {
+                text: 'Stream Turbity Mean'
             },
-            lineWidth: 1,
-            states: {
-            hover: {
-                lineWidth: 1
-            }
+            xAxis: {
+                type: 'datetime'
             },
-            threshold: null
-        }, 
-        
+            yAxis: {
+                title: {
+                    text: 'Turbity Mean'
+                }
+            },
+            plotOptions: {
+                area: {
+                    fillColor: {
+                    linearGradient: {
+                        x1: 0,
+                        y1: 0,
+                        x2: 0,
+                        y2: 1
+                    },
+                    stops: [
+                        [0, Highcharts.getOptions().colors[0]],
+                        [1, Highcharts.color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                    ]
+                    },
+                    marker: {
+                    radius: 2
+                    },
+                    lineWidth: 1,
+                    states: {
+                    hover: {
+                        lineWidth: 1
+                    }
+                    },
+                    threshold: null
+                }, 
+                
+            },
+            series: [
+                {
+                    name: 'Kelsey',
+                    data: [],
+                    selected: true
+                },
+                {
+                    name: 'Middle',
+                    data: [],
+                    selected: true
+                },
+                {
+                    name: 'Scotts',
+                    data: [],
+                    selected: true
+                }
+            ],
+            updateTime: {
+                setTime: 0,
+                endTime: 0,
+            },
+        });
     },
-
-
-    series: [
-        {
-            type: 'area',
-            name: 'Kelsey',
-            data: getTurbMean(data, "Kelsey"),
-            selected: true
-        }
-    ],
     updateTime: {
         setTime: 0,
-        endTime: 0,
-    }
-    ,
-});
+        endTime: 0
+    },
 
-
-
-
-
-const dropdown = document.querySelector("#dropdown");
-
-dropdown.addEventListener('change', (event) => {
-  let value = event.target.value
-  if (value === 'turb-mean') {
-    chart.series[0].update({
-        data: getTurbMean(data, "Kelsey")
-    }),
-    chart.setTitle({text: "Kelsey Turb Mean"}),
-    //chart.yAxis({title: {text: 'Turbity Mean'}})
-    chart.update({
-        yAxis: [{
-          title: {
-            text: 'Turbity Mean'
-          }
-        }]
-      });
-    
-  } else {
-    chart.series[0].update({
-      data: getTurbTemp(data, "Kelsey")
-    }),
-    chart.setTitle({text: "Kelsey Turb Temp"}),
-    // chart.yAxis({title: {text: 'Turbity Temperature'}})
-    chart.update({
-        yAxis: [{
-          title: {
-            text: 'Turbity Tempurature in Celsius'
-          }
-        }]
-      });
-  }
-});
-
-// // const fromTimePicker = document.querySelector("#from-time");
-// // const toTimePicker = document.querySelector("#to-time");
-// const timeButton = document.querySelector("#time-button");
-
-// function hello() {
-//     //document.getElementById("demo").innerHTML = "Hello World";
-//     const fromTimePicker = document.querySelector("#from-time");
-//     const toTimePicker = document.querySelector("#to-time");
-//     console.log(fromTimePicker);
-//     console.log(toTimePicker);
-//     console.log("hello");
-//   }
-
-// timeButton.addEventListener('change', (event) => {
-//     let value = event.target.value
-//     const fromTimePicker = document.querySelector("#from-time");
-//     const toTimePicker = document.querySelector("#to-time");
-//     console.log(fromTimePicker);
-//     console.log(toTimePicker);
-//     console.log("hello");
-//     return value
-// })
-
-const form = document.querySelector("#signup");
-
-form.addEventListener("submit", function (event) {
-	// stop form submission
-	event.preventDefault();
-    console.log("setTime",chart.updateTime)
-	// get inputted time
-	var toTime = form.elements["from-time"].value;
-    //chart.updateTime.setTime = toTime;
-	var fromTime = form.elements["to-time"].value;
-    //chart.updateTime.endTime = fromTime
-    //console.log("setTime",chart.updateTime.setTime)
-    //hello(toTime, fromTime);
-
-});
-
-function hello(to, from) {
-    return to, from;
+    // update the chart based on the new queries
+    // need to wait until the data is fetched
+    async updateData(rptdate,rptend) {
+        this.chart.showLoading();
+        for (let id = 1; id < 4; id++) {
+            let dataFromGet = await asyncGetData(id,rptdate,rptend,"turb");
+            console.log("data from get ", dataFromGet);            
+            this.chart.hideLoading();
+            this.chart.series[id-1].setData(dataFromGet);
+        }        
+    },
 }
 
 
-
-
-
-  
-        // const chart = Highcharts.chart('container', {
+// Tempurature Chart component
+var MyTemperatureChart = {
+    initHighCharts: function() {
+        this.chart = new Highcharts.chart('temp-container', {
+            chart: {
+                zoomType: 'x'
+            },
+            subtitle: {
+                text: document.ontouchstart === undefined ?
+                    'Click and drag in the plot area to zoom in' : 'Pinch the chart to zoom in'
+            },
+            title: {
+                text: 'Stream Temperature'
+            },
+            xAxis: {
+                type: 'datetime'
+            },
+            yAxis: {
+                title: {
+                    text: 'Temperature in Celsius'
+                }
+            },
         
-        //     // plotOptions: {
-        //     //     area: {
-        //     //         fillColor: {
-        //     //         linearGradient: {
-        //     //             x1: 0,
-        //     //             y1: 0,
-        //     //             x2: 0,
-        //     //             y2: 1
-        //     //         },
-        //     //         stops: [
-        //     //             [0, Highcharts.getOptions().colors[0]],
-        //     //             [1, Highcharts.color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
-        //     //         ]
-        //     //         },
-        //     //         marker: {
-        //     //         radius: 2
-        //     //         },
-        //     //         lineWidth: 1,
-        //     //         states: {
-        //     //         hover: {
-        //     //             lineWidth: 1
-        //     //         }
-        //     //         },
-        //     //         threshold: null
-        //     //     }, 
+            plotOptions: {
+                area: {
+                    fillColor: {
+                    linearGradient: {
+                        x1: 0,
+                        y1: 0,
+                        x2: 0,
+                        y2: 1
+                    },
+                    stops: [
+                        [0, Highcharts.getOptions().colors[0]],
+                        [1, Highcharts.color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                    ]
+                    },
+                    marker: {
+                    radius: 2
+                    },
+                    lineWidth: 1,
+                    states: {
+                    hover: {
+                        lineWidth: 1
+                    }
+                    },
+                    threshold: null
+                }, 
                 
-        //     // },
-    
-        //     series: [
-        //         {
-        //             type: 'area',
-        //             name: 'Kelsey',
-        //             data: turbMean.Kelsey,
-        //             selected: false
-        //         }, 
-        //         // {
-        //         //     type: 'area',
-        //         //     name: 'Kelsey',
-        //         //     data: turbTemp.Kelsey,
-        //         //     selected: false
-        //         // }, 
-        //         // {
-        //         //     type: 'area',
-        //         //     name: 'Middle',
-        //         //     data: turbMean.Middle,
-        //         //     selected: false
-        //         // }, 
-        //         // {
-        //         //     type: 'area',
-        //         //     name: 'Scotts',
-        //         //     data: turbMean.Scotts,
-        //         //     selected: false
-        //         // }
-        //     ]
-        // });
-
+            },
         
+            series: [
+                {
+                    name: 'Kelsey',
+                    data: [],
+                    selected: true
+                },
+                {
+                    name: 'Middle',
+                    data: [],
+                    selected: true
+                },
+                {
+                    name: 'Scotts',
+                    data: [],
+                    selected: true
+                }
+            ],
+            updateTime: {
+                setTime: 0,
+                endTime: 0,
+            },
+        });
+    },
+    updateTime: {
+        setTime: 0,
+        endTime: 0
+    },
 
+    // update the chart based on the new queries
+    // need to wait until the data is fetched
+    async updateData(rptdate,rptend) {
+        this.chart.showLoading();
+        for (let id = 1; id < 4; id++) {
+            let dataFromGet = await asyncGetData(id,rptdate,rptend,"temp");
+            console.log("data from get temp", dataFromGet);            
+            this.chart.hideLoading();
+            this.chart.series[id-1].setData(dataFromGet);
+        }        
+    },
+}
+  
+
+
+function main() {
+    var currentTime = getCurrentTime();
+    var lastWeekDate = getPreviousWeekDate();
+    // will show a graph of current week's data when page first loads
+    MyTurbMeanChart.initHighCharts();
+    MyTurbMeanChart.updateData(lastWeekDate, currentTime);
+    MyTemperatureChart.initHighCharts();
+    MyTemperatureChart.updateData(lastWeekDate, currentTime);
+}
+
+main();
 
 
 
